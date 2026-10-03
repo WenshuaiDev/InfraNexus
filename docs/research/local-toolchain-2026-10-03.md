@@ -10,6 +10,8 @@
 
 用户于本次研究中明确指出“typescript 5.X版本太低了”。因此 **TypeScript 5.x 不再作为项目编译器推荐或冻结候选**。本报告推荐以稳定 TypeScript 7.0.2 为目标，区分主编译器、供工具使用的兼容 API、生成器自身依赖；TypeScript 6 并存或独立生成环境均未获得用户确认。前端详细章节记录证据和备选路线。
 
+现行[工具链冻结第一轮确认](https://github.com/WenshuaiDev/InfraNexus/issues/49#issuecomment-5968158135)已决定：macOS arm64 宿主机 + linux/arm64 容器为首轮完整验收必过环境；Linux 宿主机及 linux/amd64 为适配目标，未实测则标“待验证”，不阻塞首轮交付。版本需落在受维护的声明支持交集，普通启动不改版本，技术/主版本/支持边界变化需重新讨论。本研究沿用这些已确认原则，仅补齐具体版本、证据和兼容取舍，不重新提问。
+
 | 范围 | 推荐目标候选 | 主要边界 |
 | --- | --- | --- |
 | Go / API | Go 1.26.8；chi 5.3.2；pgx 5.11.0；go-redis 9.22.0 | 直接 Go 下限有交集，实际模块闭包与组合编译未执行 |
@@ -26,7 +28,7 @@
 
 - **官方事实**：官方文档、GitHub release/tag 源码、npm/Node/Go 发布元数据及官方 SBOM。
 - **Registry 元数据**：只通过 HTTP 请求镜像 manifest/index，核对 amd64/arm64 descriptor，计算原响应 SHA-256 并与 registry digest 对比；未下载镜像层。
-- **候选推断**：根据上述事实提出版本、平台与锁定方案，均需后续冻结票确认。
+- **候选推断**：根据上述事实提出具体版本及兼容方案；尚未确认的选项需后续冻结票确认，已确认的平台与升级原则保持有效。
 - **运行证据**：本次没有。没有安装依赖、拉取镜像、执行生成器、构建工程、启动 Docker 或运行测试。只新增研究文档，未实现工程代码或更改主机工具链。
 
 来源可能继续更新。固定 tag / commit / digest 的证据用于指明本次选中的内容；可变官方文档和 registry dist-tag 只表示观测时的状态，不是永久事实。
@@ -343,7 +345,7 @@ Playwright 有更严格的独立要求：Firefox/WebKit 的官方浏览器构建
 
 ## 宿主机、Compose 与执行平台候选
 
-本节是建议输入，不是已冻结的支持承诺。研究只执行了只读元数据请求和 `uname`、`git --version`、`make --version`；未调用 Docker。当前宿主机观测为 Darwin/arm64、Git 2.55.0、GNU Make 3.81，不能据此认定 Docker 或工程工作流已通过。
+本节区分已确认的平台验收原则与尚待冻结的具体宿主工具版本。研究只执行了只读元数据请求和 `uname`、`git --version`、`make --version`；未调用 Docker。当前宿主机观测为 Darwin/arm64、Git 2.55.0、GNU Make 3.81，不能据此认定 Docker 或工程工作流已通过。
 
 | 层 | 推荐候选 | 已核实依据与边界 |
 | --- | --- | --- |
@@ -354,14 +356,14 @@ Playwright 有更严格的独立要求：Firefox/WebKit 的官方浏览器构建
 
 macOS 应处于所选 Docker Desktop 支持的系统范围。Docker 官方政策为当前及前两个 macOS 大版本，并分别提供 Apple Silicon 与 Intel 安装包；不能把这一厂商范围等同于 InfraNexus 全部验收通过。[Docker Desktop for Mac](https://docs.docker.com/desktop/setup/install/mac-install/)
 
-| 候选宿主 / 容器目标 | 建议定位 | 需要的证据 |
+| 候选宿主 / 容器目标 | 定位与确认状态 | 需要的证据 |
 | --- | --- | --- |
-| macOS arm64 → linux/arm64 | 当前可用主机的第一验证平台 | 真实本地 Docker 工作流、bind mount 热更新、入口和浏览器链路 |
-| Linux amd64 → linux/amd64 | Linux 默认支持目标 | 当前只有官方包/镜像元数据；没有原生 Linux 宿主实测，不声称已通过 |
+| macOS arm64 → linux/arm64 | 已确认首轮完整验收必过环境 | 真实本地 Docker 工作流、bind mount 热更新、入口和浏览器链路 |
+| Linux amd64 → linux/amd64 | 已确认适配目标；未验证不阻塞首轮交付 | 当前只有官方包/镜像元数据；没有原生 Linux 宿主实测，不声称已通过 |
 | macOS amd64 → linux/amd64；Linux arm64 → linux/arm64 | 元数据可行候选，是否列正式支持由冻结票决定 | 相应宿主上的真实验证；镜像存在并不覆盖宿主文件权限、监听和文件事件行为 |
 | arm64 宿主 → linux/amd64 仿真 | 可作为后续补充实验，不作为默认运行方式 | 仿真结果不能替代原生 amd64 或原生 Linux 宿主验收 |
 
-本地设备不足时保留“待验证平台”，由冻结票明确是否为首次交付阻塞条件；不新增必须采购设备或接入 CI 的要求。Linux 容器跑在 Mac 的 VM 中，不是 Linux 原生宿主验收。
+按已确认原则，本地设备不足时保留“待验证平台”，不阻塞首轮交付，也不新增必须采购设备或接入 CI 的要求。Linux 容器跑在 Mac 的 VM 中，不是 Linux 原生宿主验收。[平台与验收范围确认](https://github.com/WenshuaiDev/InfraNexus/issues/49#issuecomment-5968158135)
 
 ### 最小 Compose 特性集合
 
@@ -383,7 +385,7 @@ macOS 应处于所选 Docker Desktop 支持的系统范围。Docker 官方政策
 
 ## 锁定与更新建议
 
-这些是供后续冻结票选择的工程策略，不表示本轮已经创建了依赖文件或镜像。
+版本标签加 digest、精确依赖与锁文件、普通启动不改变版本、独立升级和按影响范围验证等原则已获第一轮确认；以下补充具体实施候选，不表示本轮已经创建了依赖文件或镜像。[锁定与升级确认](https://github.com/WenshuaiDev/InfraNexus/issues/49#issuecomment-5968158135)
 
 1. **Go 应用与工具分开锁。** 应用提交 `go.mod`、`go.sum`；为生成器、迁移、sqlc、Air 记录精确版本及工具安装来源。`go` 指令是最低版本，`toolchain` 是建议版本，都不单独保证实际编译器精确锁定。固定 Go 基础镜像 digest，并在正式容器命令使用 `GOTOOLCHAIN=local`，避免执行时自动下载新工具链；不通过 `go env -w` 修改用户环境。官方预编译工具的版本、架构、校验和独立记录，尤其区分 golangci-lint 自身构建用 Go 与它检查的项目 Go。[Go toolchains](https://go.dev/doc/toolchain)、[Go modules reference](https://go.dev/ref/mod)
 2. **前端锁实际解析结果。** 顶层直接依赖使用精确版本，提交 `pnpm-lock.yaml`，容器内 `pnpm install --frozen-lockfile`；同时固定 pnpm、Node 镜像、TypeScript 编译命令和工具兼容包。编译器、ESLint API 提供者及 OpenAPI 生成器不是同一兼容层。别名包装包若还有版本范围依赖，也必须通过 lockfile 记录实际内部包版本。[pnpm install](https://pnpm.io/cli/install)、[TypeScript 7 官方并存方案](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/)
@@ -413,8 +415,8 @@ macOS 应处于所选 Docker Desktop 支持的系统范围。Docker 官方政策
 
 - 项目 TypeScript 5.x 已由用户明确排除。是否采用 TypeScript 7 主编译器及官方 TypeScript 6 API 并存方案；原 OpenAPI 生成器的 ^5.x peer 冲突如何处理，允许独立工具环境还是调整生成器/客户端链。不能把未确认的兼容方案写成用户已接受。
 - 是否采用其余推荐精确版本、镜像发行版和 digest；是否接受 Playwright runner 内置 Node patch 与项目 Node patch 独立记录。
-- 正式支持哪些宿主机/容器组合；只有当前设备可用时，未实测平台如何标注，哪些平台验证阻塞首次交付。
+- 在已确认的首轮 macOS arm64 / linux/arm64 验收范围内，固定具体宿主工具版本和验收记录字段；其他适配目标继续按既有原则标注待验证，不重开其非阻塞地位。
 - Compose 支持下限与实际 Engine/CLI/Buildx 组合；区分已知语法能力、官方发布元数据和本地验证结果。
-- 首次构建暴露问题时，哪些同系列补丁或配置修正可常规处理；更换 TypeScript 主版本、生成器、OpenAPI dialect、数据库 major、架构或已确认职责边界应重新确认。
+- 将本报告具体兼容取舍代入已确认调整边界：本次 TypeScript 工具链与可能的生成器替换先由用户决定；实施阶段按既定规则处理不改变支持边界的补丁、路径、权限和构建参数，越过技术、主版本、数据语义或验收边界时重新讨论。
 
 这些取舍已经属于现有冻结票的问题范围，本研究不另建内容重复的决策票，不替用户完成冻结。
