@@ -1,5 +1,7 @@
 # 本地工程基座：工具链稳定版本与兼容约束研究
 
+> 使用范围更新（2026-10-03）：本报告保留研究时的历史候选与证据。现行实施选择以[冻结本地工程基座的工具链与平台支持矩阵](https://github.com/WenshuaiDev/InfraNexus/issues/49)的最终决议为准；不得直接把本报告的全部候选安装为项目依赖。新增工具事实见[Oxlint 补充研究](./local-toolchain-oxlint-2026-10-03.md)。
+
 研究日期：2026-10-03（Asia/Shanghai）。状态：**事实研究与候选建议；版本尚未冻结，组合尚未构建。**
 
 对应研究票：[核实本地工具链的稳定版本与兼容约束](https://github.com/WenshuaiDev/InfraNexus/issues/48)。所属地图：[本地工程基座：方案与工具链决策地图](https://github.com/WenshuaiDev/InfraNexus/issues/46)。范围依据：[确认纯本地工程基座的完整方案基线](https://github.com/WenshuaiDev/InfraNexus/issues/47#issuecomment-5968016780)。
